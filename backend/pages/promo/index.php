@@ -118,6 +118,14 @@ $alert = isset($_GET['msg']) ? $_GET['msg'] : '';
     .bg-aktif { background:#28a745; }
     .bg-nonaktif { background:#6c757d; }
 
+    .promo-img {
+        width: 70px;
+        height: 70px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+    }
+
     .alert-custom {
         background-color: #fff3cd;
         color: #856404;
@@ -149,6 +157,7 @@ $alert = isset($_GET['msg']) ? $_GET['msg'] : '';
                     <thead>
                     <tr>
                         <th>No</th>
+                        <th>Gambar</th>
                         <th>Nama Promo</th>
                         <th>Potongan</th>
                         <th>Tanggal Mulai</th>
@@ -164,6 +173,13 @@ $alert = isset($_GET['msg']) ? $_GET['msg'] : '';
                         while ($item = mysqli_fetch_assoc($result)): ?>
                             <tr>
                                 <td><?= $no++; ?></td>
+
+                                <!-- Gambar Promo -->
+                                <td>
+                                    <img src="../../../storages/promo/<?= $item['gambar']; ?>" 
+                                         class="promo-img" alt="gambar promo">
+                                </td>
+
                                 <td><?= htmlspecialchars($item['nama_promo']); ?></td>
                                 <td>Rp <?= number_format($item['potongan'], 0, ',', '.'); ?></td>
                                 <td><?= date('d M Y', strtotime($item['tanggal_mulai'])); ?></td>
@@ -194,11 +210,12 @@ $alert = isset($_GET['msg']) ? $_GET['msg'] : '';
                                         </a>
                                     </div>
                                 </td>
+
                             </tr>
                         <?php endwhile;
                     else: ?>
                         <tr>
-                            <td colspan="7" class="text-center text-muted">Belum ada data promo.</td>
+                            <td colspan="8" class="text-center text-muted">Belum ada data promo.</td>
                         </tr>
                     <?php endif; ?>
                     </tbody>
