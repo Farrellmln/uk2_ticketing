@@ -139,7 +139,7 @@ $alert = isset($_GET['msg']) ? $_GET['msg'] : '';
 
     <div class="card card-custom">
         <div class="card-header-custom">
-            <span>Daftar Promo Aktif & Nonaktif....</span>
+            <span>Daftar Promo Aktif & Nonaktif</span>
             <a href="create.php" class="btn-tambah">+ Tambah Promo</a>
         </div>
 
