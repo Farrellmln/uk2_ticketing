@@ -18,7 +18,7 @@ include '../../app.php';
     font-size: 1.9rem;
     font-weight: 600;
     color: #ffb703;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
   }
 
   .breadcrumb {
@@ -28,10 +28,10 @@ include '../../app.php';
   }
 
   .card-custom {
-    border-radius: 12px;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     background-color: #ffffff;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    border: none;
   }
 
   .card-header-custom {
@@ -42,73 +42,108 @@ include '../../app.php';
     font-size: 1.1rem;
   }
 
-  .btn-kuning {
+  .form-label {
+    font-weight: 600;
+    color: #ffb703;
+  }
+
+  .form-control,
+  .form-select {
+    border-radius: 10px;
+    padding: 10px 14px;
+    border: 1px solid #ddd;
+    transition: 0.2s;
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    border-color: #ffb703;
+    box-shadow: 0 0 4px rgba(255,183,3,0.4);
+  }
+
+  .btn-simpan {
     background-color: #ffb703;
-    color: #fff !important;
+    color: #fff;
     border: none;
-    padding: 10px 24px;
     border-radius: 10px;
+    padding: 12px 28px;
     font-weight: 600;
+    transition: 0.2s;
   }
 
-  .btn-kuning:hover {
-    background-color: #e09e00;
+  .btn-simpan:hover {
+    background-color: #f29c02;
+    color: #fff;
   }
 
-  .btn-kembali {
-    background-color: #6c757d;
-    color: #fff !important;
+  .btn-batal {
+    background-color: #adb5bd;
+    color: #fff;
     border: none;
-    padding: 10px 24px;
     border-radius: 10px;
+    padding: 12px 28px;
     font-weight: 600;
+    text-decoration: none;
   }
 
-  .btn-kembali:hover {
-    background-color: #5a6268;
+  .btn-batal:hover {
+    background-color: #868e96;
+    color: #fff;
   }
 </style>
 
 <div class="content-wrapper">
-
   <div class="page-title">Tambah Promo</div>
   <div class="breadcrumb">Dashboard / Promo / Tambah</div>
 
   <div class="card card-custom">
     <div class="card-header-custom">Form Tambah Promo</div>
 
-    <div class="card-body">
+    <div class="card-body p-5">
 
-      <form action="../../actions/promo/store.php" method="POST">
+      <form action="../../actions/promo/store.php" method="POST" enctype="multipart/form-data">
 
         <!-- NAMA PROMO -->
         <div class="mb-3">
-          <label class="fw-semibold mb-1">Nama Promo</label>
-          <input type="text" name="nama_promo" class="form-control form-control-lg" required>
+          <label class="form-label">Nama Promo</label>
+          <input type="text" name="nama_promo" class="form-control" placeholder="Masukkan nama promo" required>
+        </div>
+
+        <!-- KETERANGAN -->
+        <div class="mb-3">
+          <label class="form-label">Keterangan</label>
+          <textarea name="keterangan" class="form-control" rows="3" placeholder="Masukkan keterangan promo" required></textarea>
         </div>
 
         <!-- POTONGAN -->
         <div class="mb-3">
-          <label class="fw-semibold mb-1">Potongan (Rp)</label>
-          <input type="number" name="potongan" class="form-control form-control-lg" min="0" required>
+          <label class="form-label">Potongan (Rp)</label>
+          <input type="number" name="potongan" class="form-control" placeholder="Masukkan nominal potongan" required>
         </div>
 
-        <!-- TANGGAL MULAI -->
+        <!-- GAMBAR PROMO -->
         <div class="mb-3">
-          <label class="fw-semibold mb-1">Tanggal Mulai</label>
-          <input type="date" name="tanggal_mulai" class="form-control form-control-lg" required>
+          <label class="form-label">Gambar Promo</label>
+          <input type="file" name="gambar" class="form-control" required>
+          <small class="text-muted">Format jpg/png • Maks. 2MB</small>
         </div>
 
-        <!-- TANGGAL SELESAI -->
-        <div class="mb-3">
-          <label class="fw-semibold mb-1">Tanggal Selesai</label>
-          <input type="date" name="tanggal_selesai" class="form-control form-control-lg" required>
+        <!-- TANGGAL MULAI & SELESAI -->
+        <div class="row mb-3">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Tanggal Mulai</label>
+            <input type="datetime-local" name="tanggal_mulai" class="form-control" required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Tanggal Selesai</label>
+            <input type="datetime-local" name="tanggal_selesai" class="form-control" required>
+          </div>
         </div>
 
         <!-- STATUS -->
         <div class="mb-3">
-          <label class="fw-semibold mb-1">Status Promo</label>
-          <select name="status" class="form-select form-select-lg" required>
+          <label class="form-label">Status Promo</label>
+          <select name="status" class="form-select" required>
             <option value="aktif">Aktif</option>
             <option value="nonaktif">Nonaktif</option>
           </select>
@@ -116,12 +151,8 @@ include '../../app.php';
 
         <!-- BUTTON -->
         <div class="d-flex justify-content-end gap-2 mt-4">
-          <a href="index.php" class="btn-kembali">
-            <i class="bi bi-arrow-left"></i> Kembali
-          </a>
-          <button type="submit" class="btn-kuning">
-            <i class="bi bi-check2-circle"></i> Simpan Promo
-          </button>
+          <a href="index.php" class="btn-batal"><i class="bi bi-x-lg"></i> Batal</a>
+          <button type="submit" class="btn-simpan"><i class="bi bi-save"></i> Simpan</button>
         </div>
 
       </form>
