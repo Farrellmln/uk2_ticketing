@@ -4,41 +4,35 @@ include '../../partials/sidebar.php';
 include '../../partials/navbar.php';
 include '../../app.php';
 
+// ===== VALIDASI =====
 if (!isset($_GET['id'])) {
   echo "
     <script>
-      alert('ID rute tidak ditemukan!');
+      alert('ID promo tidak ditemukan!');
       window.location.href = 'index.php';
     </script>
   ";
   exit;
 }
 
-$id = $_GET['id'];
-$q = "SELECT rute.*, transportasi.nama_transportasi, transportasi.jenis
-      FROM rute
-      LEFT JOIN transportasi ON rute.id_transportasi = transportasi.id_transportasi
-      WHERE id_rute = '$id'";
-$result = mysqli_query($connect, $q);
+$id = intval($_GET['id']);
 
-if (mysqli_num_rows($result) == 0) {
+$q = mysqli_query($connect, "SELECT * FROM promo WHERE id_promo = $id");
+
+if (mysqli_num_rows($q) == 0) {
   echo "
     <script>
-      alert('Data rute tidak ditemukan!');
+      alert('Data promo tidak ditemukan!');
       window.location.href = 'index.php';
     </script>
   ";
   exit;
 }
 
-$data = mysqli_fetch_assoc($result);
+$data = mysqli_fetch_assoc($q);
 
 function formatRupiah($angka) {
   return 'Rp ' . number_format($angka, 0, ',', '.');
-}
-
-function formatTanggal($tanggal) {
-  return date('d M Y, H:i', strtotime($tanggal));
 }
 ?>
 
@@ -66,7 +60,7 @@ function formatTanggal($tanggal) {
 
   .card-custom {
     border-radius: 14px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     background-color: #ffffff;
     border: none;
   }
@@ -126,22 +120,20 @@ function formatTanggal($tanggal) {
     color: #fff;
   }
 
-  .badge-jenis {
-    border-radius: 20px;
+  .badge-aktif {
+    background-color: #28a745;
     padding: 6px 14px;
-    font-weight: 500;
+    border-radius: 10px;
+    font-weight: 600;
     color: #fff;
-    display: inline-block;
-    text-align: center;
-    min-width: 80px;
   }
 
-  .badge-pesawat {
-    background-color: #1976d2;
-  }
-
-  .badge-kereta {
-    background-color: #8e24aa;
+  .badge-nonaktif {
+    background-color: #6c757d;
+    padding: 6px 14px;
+    border-radius: 10px;
+    font-weight: 600;
+    color: #fff;
   }
 
   @media (max-width: 768px) {
@@ -152,73 +144,79 @@ function formatTanggal($tanggal) {
 </style>
 
 <div class="content-wrapper">
-  <div class="page-title">Detail Rute</div>
-  <div class="breadcrumb">Dashboard / Rute / Detail</div>
+  <div class="page-title">Detail Promo</div>
+  <div class="breadcrumb">Dashboard / Promo / Detail</div>
 
   <div class="card card-custom">
-    <div class="card-header-custom">Informasi Rute</div>
+    <div class="card-header-custom">Informasi Promo</div>
 
     <div class="card-body">
       <div class="detail-container">
+
+        <!-- Nama Promo -->
         <div>
-          <div class="detail-label"><i class="bi bi-train-front"></i> Nama Transportasi</div>
-          <div class="detail-value"><?= htmlspecialchars($data['nama_transportasi']); ?></div>
+          <div class="detail-label"><i class="bi bi-ticket-perforated-fill"></i> Nama Promo</div>
+          <div class="detail-value"><?= htmlspecialchars($data['nama_promo']); ?></div>
           <hr>
         </div>
 
+        <!-- Potongan -->
         <div>
-          <div class="detail-label"><i class="bi bi-tag-fill"></i> Jenis Transportasi</div>
+          <div class="detail-label"><i class="bi bi-cash-stack"></i> Potongan Harga</div>
+          <div class="detail-value"><?= formatRupiah($data['potongan']); ?></div>
+          <hr>
+        </div>
+
+        <!-- Tanggal Mulai -->
+        <div>
+          <div class="detail-label"><i class="bi bi-calendar-check-fill"></i> Tanggal Mulai</div>
+          <div class="detail-value"><?= date('d M Y', strtotime($data['tanggal_mulai'])); ?></div>
+          <hr>
+        </div>
+
+        <!-- Tanggal Selesai -->
+        <div>
+          <div class="detail-label"><i class="bi bi-calendar-x-fill"></i> Tanggal Selesai</div>
+          <div class="detail-value"><?= date('d M Y', strtotime($data['tanggal_selesai'])); ?></div>
+          <hr>
+        </div>
+
+        <!-- Status -->
+        <div>
+          <div class="detail-label"><i class="bi bi-flag-fill"></i> Status</div>
           <div class="detail-value">
-            <?php if ($data['jenis'] == 'Pesawat'): ?>
-              <span class="badge-jenis badge-pesawat">Pesawat</span>
+            <?php if ($data['status'] == 'aktif'): ?>
+              <span class="badge-aktif">Aktif</span>
             <?php else: ?>
-              <span class="badge-jenis badge-kereta">Kereta</span>
+              <span class="badge-nonaktif">Nonaktif</span>
             <?php endif; ?>
           </div>
           <hr>
         </div>
 
-        <div>
-          <div class="detail-label"><i class="bi bi-geo-alt-fill"></i> Asal Keberangkatan</div>
-          <div class="detail-value"><?= htmlspecialchars($data['asal']); ?></div>
-          <hr>
-        </div>
-
-        <div>
-          <div class="detail-label"><i class="bi bi-geo-fill"></i> Tujuan</div>
-          <div class="detail-value"><?= htmlspecialchars($data['tujuan']); ?></div>
-          <hr>
-        </div>
-
-        <div>
-          <div class="detail-label"><i class="bi bi-cash-stack"></i> Harga Tiket</div>
-          <div class="detail-value"><?= formatRupiah($data['harga']); ?></div>
-          <hr>
-        </div>
-
-        <div>
-          <div class="detail-label"><i class="bi bi-clock"></i> Jadwal Berangkat</div>
-          <div class="detail-value"><?= formatTanggal($data['jadwal_berangkat']); ?></div>
-          <hr>
-        </div>
-
-        <div>
-          <div class="detail-label"><i class="bi bi-clock-history"></i> Jadwal Tiba</div>
-          <div class="detail-value"><?= formatTanggal($data['jadwal_tiba']); ?></div>
-          <hr>
-        </div>
-
+        <!-- Gambar Promo -->
         <div style="grid-column: span 2;">
-          <div class="detail-label"><i class="bi bi-info-circle"></i> Keterangan</div>
-          <div class="detail-value">
-            Rute ini merupakan perjalanan dari <b><?= htmlspecialchars($data['asal']); ?></b> menuju <b><?= htmlspecialchars($data['tujuan']); ?></b> menggunakan <b><?= htmlspecialchars($data['nama_transportasi']); ?></b>.
-          </div>
+          <div class="detail-label"><i class="bi bi-image"></i> Gambar Promo</div>
+
+          <?php if (!empty($data['gambar'])): ?>
+            <img src="../../../storages/promo/<?= $data['gambar']; ?>"
+                 class="img-fluid rounded border"
+                 style="max-height:350px; object-fit:contain;">
+          <?php else: ?>
+            <div class="detail-value text-muted">Tidak ada gambar promo.</div>
+          <?php endif; ?>
+
+          <hr>
         </div>
+
       </div>
 
       <div class="d-flex justify-content-end">
-        <a href="index.php" class="btn-kembali"><i class="bi bi-arrow-left"></i> Kembali</a>
+        <a href="index.php" class="btn-kembali">
+          <i class="bi bi-arrow-left"></i> Kembali
+        </a>
       </div>
+
     </div>
   </div>
 </div>

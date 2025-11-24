@@ -1,33 +1,60 @@
 <?php
 include '../../app.php';
 
-if (isset($_GET['id'])) {
-  $id = $_GET['id'];
-
-  $query = "DELETE FROM rute WHERE id_rute = '$id'";
-  $result = mysqli_query($connect, $query);
-
-  if ($result) {
+if (!isset($_GET['id'])) {
     echo "
-      <script>
-        alert('Data rute berhasil dihapus!');
-        window.location.href = '../../pages/rute/index.php';
-      </script>
+        <script>
+            alert('ID promo tidak ditemukan!');
+            window.location.href = '../../pages/promo/index.php';
+        </script>
     ";
-  } else {
+    exit;
+}
+
+$id = intval($_GET['id']);
+
+// Ambil data promo dulu (untuk hapus gambar)
+$q = mysqli_query($connect, "SELECT gambar FROM promo WHERE id_promo = $id");
+
+if (mysqli_num_rows($q) == 0) {
     echo "
-      <script>
-        alert('Gagal menghapus data rute!');
-        window.history.back();
-      </script>
+        <script>
+            alert('Data promo tidak ditemukan!');
+            window.location.href = '../../pages/promo/index.php';
+        </script>
     ";
-  }
+    exit;
+}
+
+$data = mysqli_fetch_assoc($q);
+$gambar = $data['gambar'];
+
+// Hapus database
+$delete = mysqli_query($connect, "DELETE FROM promo WHERE id_promo = $id");
+
+if ($delete) {
+
+    // Hapus gambar jika ada
+    if (!empty($gambar)) {
+        $path = "../../../storages/promo/" . $gambar;
+
+        if (file_exists($path)) {
+            unlink($path);
+        }
+    }
+
+    echo "
+        <script>
+            alert('Promo berhasil dihapus!');
+            window.location.href = '../../pages/promo/index.php';
+        </script>
+    ";
 } else {
-  echo "
-    <script>
-      alert('ID rute tidak ditemukan!');
-      window.location.href = '../../pages/rute/index.php';
-    </script>
-  ";
+    echo "
+        <script>
+            alert('Terjadi kesalahan saat menghapus promo!');
+            window.location.href = '../../pages/promo/index.php';
+        </script>
+    ";
 }
 ?>
