@@ -7,7 +7,7 @@ include '../../app.php';
 if (!isset($_GET['id'])) {
   echo "
     <script>
-      alert('ID rute tidak ditemukan!');
+      alert('ID promo tidak ditemukan!');
       window.location.href = 'index.php';
     </script>
   ";
@@ -15,13 +15,13 @@ if (!isset($_GET['id'])) {
 }
 
 $id = $_GET['id'];
-$q = "SELECT * FROM rute WHERE id_rute = '$id'";
+$q = "SELECT * FROM promo WHERE id_promo = '$id'";
 $r = mysqli_query($connect, $q);
 
 if (mysqli_num_rows($r) == 0) {
   echo "
     <script>
-      alert('Data rute tidak ditemukan!');
+      alert('Data promo tidak ditemukan!');
       window.location.href = 'index.php';
     </script>
   ";
@@ -29,7 +29,6 @@ if (mysqli_num_rows($r) == 0) {
 }
 
 $data = mysqli_fetch_assoc($r);
-$transportasi = mysqli_query($connect, "SELECT * FROM transportasi ORDER BY jenis ASC");
 ?>
 
 <style>
@@ -55,7 +54,7 @@ $transportasi = mysqli_query($connect, "SELECT * FROM transportasi ORDER BY jeni
   .card-custom {
     border-radius: 14px;
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     background-color: #ffffff;
   }
 
@@ -119,61 +118,78 @@ $transportasi = mysqli_query($connect, "SELECT * FROM transportasi ORDER BY jeni
     gap: 10px;
     margin-top: 25px;
   }
+
+  .preview-img {
+    max-height: 150px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+  }
 </style>
 
 <div class="content-wrapper">
-  <div class="page-title">Edit Data Rute</div>
-  <div class="breadcrumb">Dashboard / Rute / Edit</div>
+  <div class="page-title">Edit Promo</div>
+  <div class="breadcrumb">Dashboard / Promo / Edit</div>
 
   <div class="card card-custom">
-    <div class="card-header-custom">Form Edit Rute</div>
+    <div class="card-header-custom">Form Edit Promo</div>
     <div class="card-body">
-      <form action="../../actions/rute/update.php" method="POST">
-        <input type="hidden" name="id_rute" value="<?= $data['id_rute']; ?>">
+      <form action="../../actions/promo/update.php" method="POST" enctype="multipart/form-data">
+
+        <input type="hidden" name="id_promo" value="<?= $data['id_promo']; ?>">
 
         <div class="row g-3">
+
           <div class="col-md-6">
-            <label class="form-label">Jenis Transportasi</label>
-            <select class="form-select" name="id_transportasi" required>
-              <option value="">-- Pilih Transportasi --</option>
-              <?php while ($t = mysqli_fetch_assoc($transportasi)): ?>
-                <option value="<?= $t['id_transportasi']; ?>" <?= $data['id_transportasi'] == $t['id_transportasi'] ? 'selected' : ''; ?>>
-                  <?= htmlspecialchars($t['jenis']); ?> - <?= htmlspecialchars($t['nama_transportasi']); ?>
-                </option>
-              <?php endwhile; ?>
+            <label class="form-label">Nama Promo</label>
+            <input type="text" class="form-control" name="nama_promo"
+                   value="<?= htmlspecialchars($data['nama_promo']); ?>" required>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Potongan (Rp)</label>
+            <input type="number" class="form-control" name="potongan"
+                   value="<?= $data['potongan']; ?>" required>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Tanggal Mulai</label>
+            <input type="date" class="form-control" name="tanggal_mulai"
+                   value="<?= $data['tanggal_mulai']; ?>" required>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Tanggal Selesai</label>
+            <input type="date" class="form-control" name="tanggal_selesai"
+                   value="<?= $data['tanggal_selesai']; ?>" required>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Status Promo</label>
+            <select name="status" class="form-select" required>
+              <option value="aktif" <?= $data['status'] == 'aktif' ? 'selected' : '' ?>>Aktif</option>
+              <option value="nonaktif" <?= $data['status'] == 'nonaktif' ? 'selected' : '' ?>>Nonaktif</option>
             </select>
           </div>
 
           <div class="col-md-6">
-            <label class="form-label">Harga Tiket</label>
-            <input type="number" class="form-control" name="harga" value="<?= $data['harga']; ?>" required>
+            <label class="form-label">Gambar Promo</label>
+            <input type="file" class="form-control" name="gambar">
+
+            <?php if (!empty($data['gambar'])): ?>
+              <div class="mt-2">
+                <p class="text-muted mb-1">Gambar saat ini:</p>
+                <img src="../../../storages/promo/<?= $data['gambar']; ?>" class="preview-img">
+              </div>
+            <?php endif; ?>
           </div>
 
-          <div class="col-md-6">
-            <label class="form-label">Asal Keberangkatan</label>
-            <input type="text" class="form-control" name="asal" value="<?= htmlspecialchars($data['asal']); ?>" required>
-          </div>
-
-          <div class="col-md-6">
-            <label class="form-label">Tujuan</label>
-            <input type="text" class="form-control" name="tujuan" value="<?= htmlspecialchars($data['tujuan']); ?>" required>
-          </div>
-
-          <div class="col-md-6">
-            <label class="form-label">Jadwal Berangkat</label>
-            <input type="datetime-local" class="form-control" name="jadwal_berangkat" value="<?= date('Y-m-d\TH:i', strtotime($data['jadwal_berangkat'])); ?>" required>
-          </div>
-
-          <div class="col-md-6">
-            <label class="form-label">Jadwal Tiba</label>
-            <input type="datetime-local" class="form-control" name="jadwal_tiba" value="<?= date('Y-m-d\TH:i', strtotime($data['jadwal_tiba'])); ?>" required>
-          </div>
         </div>
 
         <div class="btn-group-bottom">
           <a href="index.php" class="btn-batal">Batal</a>
           <button type="submit" class="btn-submit">Simpan Perubahan</button>
         </div>
+
       </form>
     </div>
   </div>
