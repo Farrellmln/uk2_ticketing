@@ -1,16 +1,32 @@
 <?php
 include '../../app.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $id_transportasi = mysqli_real_escape_string($connect, $_POST['id_transportasi']);
-  $asal             = mysqli_real_escape_string($connect, $_POST['asal']);
-  $tujuan           = mysqli_real_escape_string($connect, $_POST['tujuan']);
-  $harga            = mysqli_real_escape_string($connect, $_POST['harga']);
-  $jadwal_berangkat = mysqli_real_escape_string($connect, $_POST['jadwal_berangkat']);
-  $jadwal_tiba      = mysqli_real_escape_string($connect, $_POST['jadwal_tiba']);
+// Pastikan POST
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    echo "
+      <script>
+        alert('Akses tidak valid!');
+        window.location.href='../../pages/promo/index.php';
+      </script>
+    ";
+    exit;
+}
 
-  // Validasi sederhana
-  if (empty($id_transportasi) || empty($asal) || empty($tujuan) || empty($harga) || empty($jadwal_berangkat) || empty($jadwal_tiba)) {
+$nama_promo      = mysqli_real_escape_string($connect, $_POST['nama_promo'] ?? '');
+$keterangan      = mysqli_real_escape_string($connect, $_POST['keterangan'] ?? '');
+$potongan        = mysqli_real_escape_string($connect, $_POST['potongan'] ?? '');
+$tanggal_mulai   = mysqli_real_escape_string($connect, $_POST['tanggal_mulai'] ?? '');
+$tanggal_selesai = mysqli_real_escape_string($connect, $_POST['tanggal_selesai'] ?? '');
+$status          = mysqli_real_escape_string($connect, $_POST['status'] ?? 'nonaktif');
+
+// Validasi wajib
+if (
+    empty($nama_promo) ||
+    empty($keterangan) ||
+    empty($potongan) ||
+    empty($tanggal_mulai) ||
+    empty($tanggal_selesai)
+) {
     echo "
       <script>
         alert('Semua field wajib diisi!');
@@ -18,34 +34,66 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </script>
     ";
     exit;
-  }
+}
 
-  $query = "INSERT INTO rute (id_transportasi, asal, tujuan, harga, jadwal_berangkat, jadwal_tiba)
-            VALUES ('$id_transportasi', '$asal', '$tujuan', '$harga', '$jadwal_berangkat', '$jadwal_tiba')";
+// ==========================
+// UPLOAD GAMBAR
+// ==========================
+$uploadDir = '../../../storages/promo/';
+$gambarName = '';
 
-  $result = mysqli_query($connect, $query);
+if (!empty($_FILES['gambar']['name'])) {
 
-  if ($result) {
+    $fileName = $_FILES['gambar']['name'];
+    $tmpName  = $_FILES['gambar']['tmp_name'];
+
+    $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+    $allowed = ['jpg', 'jpeg', 'png', 'webp'];
+
+    if (!in_array($ext, $allowed)) {
+        echo "
+          <script>
+            alert('Format gambar tidak valid! Gunakan JPG, PNG, atau WebP.');
+            window.history.back();
+          </script>
+        ";
+        exit;
+    }
+
+    // nama file unik
+    $gambarName = time() . '_' . uniqid() . '.' . $ext;
+
+    move_uploaded_file($tmpName, $uploadDir . $gambarName);
+}
+
+// ==========================
+// INSERT
+// ==========================
+$q = "
+  INSERT INTO promo (nama_promo, keterangan, potongan, gambar, tanggal_mulai, tanggal_selesai, status)
+  VALUES ('$nama_promo', '$keterangan', '$potongan', '$gambarName', '$tanggal_mulai', '$tanggal_selesai', '$status')
+";
+
+$result = mysqli_query($connect, $q);
+
+// ==========================
+// RESPONSE
+// ==========================
+if ($result) {
     echo "
       <script>
-        alert('Rute berhasil ditambahkan!');
-        window.location.href = '../../pages/rute/index.php';
+        alert('Promo berhasil ditambahkan!');
+        window.location.href='../../pages/promo/index.php';
       </script>
     ";
-  } else {
+} else {
+    $err = mysqli_error($connect);
     echo "
       <script>
-        alert('Terjadi kesalahan saat menambahkan rute: " . mysqli_error($connect) . "');
+        alert('Terjadi kesalahan saat menambahkan promo: $err');
         window.history.back();
       </script>
     ";
-  }
-} else {
-  echo "
-    <script>
-      alert('Akses tidak valid!');
-      window.location.href = '../../pages/rute/index.php';
-    </script>
-  ";
 }
+exit;
 ?>
